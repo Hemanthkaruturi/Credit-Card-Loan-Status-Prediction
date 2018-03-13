@@ -50,5 +50,22 @@ sort(sapply(train, function(x) { sum(is.na(x)) }), decreasing=TRUE)
 library(mice)
 imputed_data <- mice(train[,c(6,7,17,19)], m=5, maxit = 50, method = 'rf', seed = 500)
 train[,c(6,7,17,19)] <- complete(imputed_data, 2)
+########################## Taking toooo long ############################################################
 
-sub()
+#imputing Na values using Amelia
+install.packages("Amelia")
+library(Amelia)
+amelia_fit <- amelia(train[,c(6,7,17,18,19)], m=5, parallel = "multicore")
+train[,c(6,7,17,18,19)] <- amelia_fit$imputations[[2]]
+########################## Unable to insert values in bancruptcies :-( ##############################
+
+#imputing missing values with missForest
+install.packages("missForest")
+library(missForest)
+imp <- missForest(train[,c(6,7,17,18,19)])
+train[,c(6,7,17,18,19)] <- imp$ximp   
+######################### Taking too long ###########################################################
+
+imputed_data <- mice(train[,c(17,18)], m=5, maxit = 50, method = 'rf', seed = 500)
+train[,c(17,18)] <- complete(imputed_data, 2)
+####################### Till it doesn't do anything #################################################
