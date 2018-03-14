@@ -69,3 +69,42 @@ mode(train$Bankruptcies)
 
 #Inserting missing values with mode in bancrupcies (here mode is 0)
 train$Bankruptcies[is.na(train$Bankruptcies)] <- 0
+
+#Feature Scaling
+train_data <- train
+library(caret)
+preObj <- preProcess(train_data[, -16], method=c("center", "scale"))
+train_data <- predict(preObj, train_data[, -16])
+train_data$LoanStatus <- train[,16]
+
+############################################## End of data preparation ###################################
+
+#Splitting train data in to two datasets for validation
+library(caTools)
+set.seed(123)
+split <- sample.split(train_data$LoanStatus, SplitRatio = 0.80)
+trainset <- subset(train_data, split == TRUE)
+testset <- subset(train_data, split == FALSE)
+
+#Applying kernel PCA for dimensinality reduction
+library(kernlab)
+kpca = kpca(~., data = trainset, kernel = 'rbfdot', features = 10)
+training_set_pca = as.data.frame(predict(kpca, trainset))
+training_set_pca$Loan_Status = trainset$Loan_Status
+test_set_pca = as.data.frame(predict(kpca, testset))
+test_set_pca$Loan_Status = testset$Loan_Status
+
+############################################ Model Preperation ##########################################
+
+#Fitting training data to KNN
+library(class)
+knn_classifier <- knn(train = trainset[,-16], test = testset[,-16], cl = trainset$LoanStatus, k=5, prob = TRUE)
+
+#Fitting training data to Random Forest
+library(randomForest)
+set.seed(123)
+rf_classifier <- randomForest(x = trainset[,-16], y = trainset$LoanStatus, ntree = 500)
+
+
+#Predicting the results
+cm_knn <- table(testset$LoanStatus,knn_classifier)     #12274/4126
