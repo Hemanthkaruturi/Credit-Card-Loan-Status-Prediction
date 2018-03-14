@@ -108,7 +108,7 @@ knn_classifier <- knn(train = trainset[,-16], test = testset[,-16], cl = trainse
 #Fitting training data to Random Forest
 library(randomForest)
 set.seed(123)
-rf_classifier <- randomForest(x = trainset[,-16], y = trainset$LoanStatus, ntree = 500)
+rf_classifier <- randomForest(x = trainset[,-16], y = trainset$LoanStatus, ntree = 500, type = 'classification')
 
 #Fitting training data to SVM
 library(e1071)
@@ -132,31 +132,33 @@ xg_classifier <- xgboost(data = as.matrix(trainset[,-16]), label = trainset$Loan
 
 #Fitting training data to Gradient boost model
 library(gbm)
-gb_classifier <- gbm(LoanStatus ~ ., data = trainset[,-16],distribution = "gaussian",n.trees = 10000, interaction.depth = 4, shrinkage = 0.01)
+gb_classifier <- gbm(LoanStatus ~ ., data = trainset,distribution = "gaussian",n.trees = 10000, interaction.depth = 4, shrinkage = 0.01)
 
+###########################################################################################
 #cross validation
-library(caret)
-train_control<- trainControl(method="cv", number=10, savePredictions = TRUE)
-model<- train(LoanStatus~., data=trainset, trControl=train_control, method="rpart")
+# library(caret)
+# train_control<- trainControl(method="cv", number=10, savePredictions = TRUE)
+# model<- train(LoanStatus~., data=trainset, trControl=train_control, method="rpart")
+############################### Error: undefined columns selected #########################
 
 #Predicting the test results
 svm_pred <- predict(svm_classifier, newdata = testset[,-16])
 nb_pred <-  predict(nb_classifier, newdata = testset[,-16])
-dt_pred <-  predict(dt_classifier, newdata = testset[,-16], type='class')
+dt_pred <-  predict(dt_classifier, newdata = testset[,-16])
 rf_pred <-  predict(rf_classifier, newdata = testset[,-16])
 xg_pred <-  predict(xg_classifier, newdata = as.matrix(testset[,-16]))
 xg_pred <- (xg_pred >= 0.5)
 n.trees = seq(from=100 ,to=10000, by=100)
 gb_pred <- predict(gb_classifier, newdata = testset[,-16], n.trees = n.trees)
-kf_pred <- predict(model, newdata = testset[,-16])
+#kf_pred <- predict(model, newdata = testset[,-16])
 
 #confusion matrix                                                           
-cm_knn <- table(testset$LoanStatus,knn_classifier)    
-cm_svm <- table(testset$LoanStatus, svm_pred)         
-cm_nb <- table(testset$LoanStatus, nb_pred)           
+cm_knn <- table(testset$LoanStatus,knn_classifier)    #1443/557
+cm_svm <- table(testset$LoanStatus, svm_pred)         #1352/648
+#cm_nb <- table(testset$LoanStatus, nb_pred)         #Gettign Error:all arguments must have the same length  
 cm_dt <- table(testset$LoanStatus, dt_pred)           
 cm_rf <- table(testset$LoanStatus, rf_pred)           
 cm_xg <- table(testset$LoanStatus, xg_pred)            
-cm_gb <- table(testset$LoanStatus, gb_pred)
-cm_kf <- table(testset$LoanStatus, kf_pred)            
+#cm_gb <- table(testset$LoanStatus, gb_pred)         #Gettign Error:all arguments must have the same length
+#cm_kf <- table(testset$LoanStatus, kf_pred)            
 
