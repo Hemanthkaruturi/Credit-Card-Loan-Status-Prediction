@@ -70,6 +70,11 @@ mode(train$Bankruptcies)
 #Inserting missing values with mode in bancrupcies (here mode is 0)
 train$Bankruptcies[is.na(train$Bankruptcies)] <- 0
 
+# Removing `Loan ID`` and `Customer ID``
+# Removing `Months since last delinquent`` since its has 50% of missing values
+# placing target label at last column
+train <- train[,c(4,5,6,7,8,9,10,11,12,14,15,16,17,18,19,3)]
+
 #Feature Scaling
 train_data <- train
 library(caret)
