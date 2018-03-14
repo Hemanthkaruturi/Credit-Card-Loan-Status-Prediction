@@ -99,7 +99,7 @@ training_set_pca$Loan_Status = trainset$Loan_Status
 test_set_pca = as.data.frame(predict(kpca, testset))
 test_set_pca$Loan_Status = testset$Loan_Status
 
-############################################ Model Preperation ##########################################
+############################################# Model Preparation starts here #############################################
 
 #Fitting training data to KNN
 library(class)
@@ -110,6 +110,53 @@ library(randomForest)
 set.seed(123)
 rf_classifier <- randomForest(x = trainset[,-16], y = trainset$LoanStatus, ntree = 500)
 
+#Fitting training data to SVM
+library(e1071)
+svm_classifier = svm(formula = LoanStatus ~ .,
+                     data = trainset,
+                     type = 'C-classification',
+                     kernel = 'sigmoid')
 
-#Predicting the results
-cm_knn <- table(testset$LoanStatus,knn_classifier)     #12274/4126
+#Fitting training data to naive bayes
+library(e1071)
+nb_classifier = naiveBayes(x = trainset[,-16],
+                           y = trainset$LoanStatus)
+
+#Fitting training data to decision tree
+library(rpart)
+dt_classifier <- rpart(formula = LoanStatus ~ ., data = train_data)
+
+#Fitting training data to XGBoost Model
+library(xgboost)
+xg_classifier <- xgboost(data = as.matrix(trainset[,-16]), label = trainset$LoanStatus, nrounds = 10)
+
+#Fitting training data to Gradient boost model
+library(gbm)
+gb_classifier <- gbm(LoanStatus ~ ., data = trainset[,-16],distribution = "gaussian",n.trees = 10000, interaction.depth = 4, shrinkage = 0.01)
+
+#cross validation
+library(caret)
+train_control<- trainControl(method="cv", number=10, savePredictions = TRUE)
+model<- train(LoanStatus~., data=trainset, trControl=train_control, method="rpart")
+
+#Predicting the test results
+svm_pred <- predict(svm_classifier, newdata = testset[,-16])
+nb_pred <-  predict(nb_classifier, newdata = testset[,-16])
+dt_pred <-  predict(dt_classifier, newdata = testset[,-16], type='class')
+rf_pred <-  predict(rf_classifier, newdata = testset[,-16])
+xg_pred <-  predict(xg_classifier, newdata = as.matrix(testset[,-16]))
+xg_pred <- (xg_pred >= 0.5)
+n.trees = seq(from=100 ,to=10000, by=100)
+gb_pred <- predict(gb_classifier, newdata = testset[,-16], n.trees = n.trees)
+kf_pred <- predict(model, newdata = testset[,-16])
+
+#confusion matrix                                                           
+cm_knn <- table(testset$LoanStatus,knn_classifier)    
+cm_svm <- table(testset$LoanStatus, svm_pred)         
+cm_nb <- table(testset$LoanStatus, nb_pred)           
+cm_dt <- table(testset$LoanStatus, dt_pred)           
+cm_rf <- table(testset$LoanStatus, rf_pred)           
+cm_xg <- table(testset$LoanStatus, xg_pred)            
+cm_gb <- table(testset$LoanStatus, gb_pred)
+cm_kf <- table(testset$LoanStatus, kf_pred)            
+
