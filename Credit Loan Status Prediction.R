@@ -159,6 +159,7 @@ svm_pred <- predict(svm_classifier, newdata = testset[,-16])
 nb_pred <-  predict(nb_classifier, newdata = testset[,-16])
 dt_pred <-  predict(dt_classifier, newdata = testset[,-16])
 rf_pred <-  predict(rf_classifier, newdata = testset[,-16])
+rf_pred <- as.integer(rf_pred)
 xg_pred <-  predict(xg_classifier, newdata = as.matrix(testset[,-16]))
 xg_pred <- (xg_pred >= 0.5)
 n.trees = seq(from=100 ,to=10000, by=100)
@@ -172,7 +173,7 @@ h2o_pred <- as.integer(h2o_pred)
 #confusion matrix                                                           
 cm_knn <- table(testset$LoanStatus,knn_classifier)    #72% Accuracy
 cm_svm <- table(testset$LoanStatus, svm_pred)         #67% Accuracy
-#cm_nb <- table(testset$LoanStatus, nb_pred)         #Gettign Error:all arguments must have the same length  
+cm_nb <- table(testset$LoanStatus, nb_pred)           #6490/9910
 cm_dt <- table(testset$LoanStatus, dt_pred)           
 cm_rf <- table(testset$LoanStatus, rf_pred)           
 cm_xg <- table(testset$LoanStatus, xg_pred)            
