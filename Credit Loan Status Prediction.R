@@ -170,8 +170,8 @@ h2o_pred <- ifelse(pred[,3] >0.5,0,1)
 h2o_pred <- as.integer(h2o_pred)
 
 #confusion matrix                                                           
-cm_knn <- table(testset$LoanStatus,knn_classifier)    #1443/557
-cm_svm <- table(testset$LoanStatus, svm_pred)         #1352/648
+cm_knn <- table(testset$LoanStatus,knn_classifier)    #72% Accuracy
+cm_svm <- table(testset$LoanStatus, svm_pred)         #67% Accuracy
 #cm_nb <- table(testset$LoanStatus, nb_pred)         #Gettign Error:all arguments must have the same length  
 cm_dt <- table(testset$LoanStatus, dt_pred)           
 cm_rf <- table(testset$LoanStatus, rf_pred)           
