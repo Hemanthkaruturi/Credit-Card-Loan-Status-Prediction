@@ -165,10 +165,8 @@ n.trees = seq(from=100 ,to=10000, by=100)
 gb_pred <- predict(gb_classifier, newdata = testset[,-16], n.trees = n.trees)
 #kf_pred <- predict(model, newdata = testset[,-16])
 
-ann_pred <- h2o.predict(ann_classifier, newdata = as.h2o(testset[,-16]))
-ann_pred <- as.vector(ann_pred)
-h2o_pred <- (ann_pred > 0.5)
-h2o_pred <- as.vector(h2o_pred)
+pred <- as.data.frame(predict(ann_classifier, newdata = as.h2o(testset[,-16])))
+h2o_pred <- ifelse(pred[,3] >0.5,0,1)
 h2o_pred <- as.integer(h2o_pred)
 
 #confusion matrix                                                           
