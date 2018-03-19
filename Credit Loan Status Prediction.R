@@ -179,4 +179,4 @@ cm_xg <- table(testset$LoanStatus, xg_pred)
 #cm_gb <- table(testset$LoanStatus, gb_pred)         #Gettign Error:all arguments must have the same length
 #cm_kf <- table(testset$LoanStatus, kf_pred)            
 
-cm_ann <- table(testset$LoanStatus, h2o_pred)
+cm_ann <- table(testset$LoanStatus, h2o_pred)         #77% accuracy
