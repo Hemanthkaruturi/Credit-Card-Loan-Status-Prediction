@@ -134,6 +134,19 @@ xg_classifier <- xgboost(data = as.matrix(trainset[,-16]), label = trainset$Loan
 library(gbm)
 gb_classifier <- gbm(LoanStatus ~ ., data = trainset,distribution = "gaussian",n.trees = 10000, interaction.depth = 4, shrinkage = 0.01)
 
+################################## Artificial Neural network ######################################
+library(h2o)
+h2o.init(nthreads = -1)
+ann_classifier <- h2o.deeplearning(y = 'LoanStatus',
+                                   training_frame = as.h2o(trainset),
+                                   activation = 'Rectifier',
+                                   epochs = 100,
+                                   hidden = c(8,8),
+                                   train_samples_per_iteration = -2)
+
+###########################################################################################
+
+
 ###########################################################################################
 #cross validation
 # library(caret)
@@ -152,6 +165,12 @@ n.trees = seq(from=100 ,to=10000, by=100)
 gb_pred <- predict(gb_classifier, newdata = testset[,-16], n.trees = n.trees)
 #kf_pred <- predict(model, newdata = testset[,-16])
 
+ann_pred <- h2o.predict(ann_classifier, newdata = as.h2o(testset[,-16]))
+ann_pred <- as.vector(ann_pred)
+h2o_pred <- (ann_pred > 0.5)
+h2o_pred <- as.vector(h2o_pred)
+h2o_pred <- as.integer(h2o_pred)
+
 #confusion matrix                                                           
 cm_knn <- table(testset$LoanStatus,knn_classifier)    #1443/557
 cm_svm <- table(testset$LoanStatus, svm_pred)         #1352/648
@@ -162,3 +181,4 @@ cm_xg <- table(testset$LoanStatus, xg_pred)
 #cm_gb <- table(testset$LoanStatus, gb_pred)         #Gettign Error:all arguments must have the same length
 #cm_kf <- table(testset$LoanStatus, kf_pred)            
 
+cm_ann <- table(testset$LoanStatus, h2o_pred)
