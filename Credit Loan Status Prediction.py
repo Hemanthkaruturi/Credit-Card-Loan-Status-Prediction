@@ -85,21 +85,56 @@ x_train, x_test, y_train, y_test = train_test_split(d[:,:15], d[:,15:], test_siz
 
 #Model Preparation
 
+#Model building
+
 #Fitting model to KNN
 from sklearn.neighbors import KNeighborsClassifier
 knn_classifier = KNeighborsClassifier(n_neighbors = 5, metric = 'minkowski', p = 2)
 knn_classifier.fit(x_train, y_train)
+
+#Fitting model to kernel SVM
+from sklearn.svm import SVC
+svm_classifier = SVC(kernel = 'rbf', random_state = 0)
+svm_classifier.fit(x_train, y_train)
+
+#Fitting model to naive bayes
+from sklearn.naive_bayes import GaussianNB
+nb_classifier = GaussianNB()
+nb_classifier.fit(x_train, y_train)
+
+#Fitting model to Decision Tree
+from sklearn.tree import DecisionTreeClassifier
+dt_classifier = DecisionTreeClassifier(criterion = 'entropy', random_state = 0)
+dt_classifier.fit(x_train, y_train)
 
 #Fitting model to Random Forest
 from sklearn.ensemble import RandomForestClassifier
 rf_classifier = RandomForestClassifier(n_estimators = 10, criterion = 'entropy', random_state = 0)
 rf_classifier.fit(x_train, y_train)
 
-#Predicting the data
-knn_pred = knn_classifier.predict(x_test)
-rf_pred = rf_classifier.predict(x_test)
+#Fitting model to xgboost
+from xgboost import XGBClassifier
+xg_classifier = XGBClassifier()
+xg_classifier.fit(x_train, y_train)
 
-#Confusion Matrix
-from sklearn.metrics import confusion_matrix
-knn_cm = confusion_matrix(y_test, knn_pred) #69
-rf_cm = confusion_matrix(y_test, rf_pred)   #74
+#predicting the results
+knn_pred = knn_classifier.predict(x_test)
+svm_pred = svm_classifier.predict(x_test)
+nb_pred = nb_classifier.predict(x_test)
+dt_pred = dt_classifier.predict(x_test)
+rf_pred = rf_classifier.predict(x_test)
+xg_pred = xg_classifier.predict(x_test)
+
+#validating the model with confusion matrics
+knn_cm = confusion_matrix(y_test, knn_pred)     
+svm_cm = confusion_matrix(y_test, svm_pred)     
+nb_cm  = confusion_matrix(y_test, nb_pred)      
+dt_cm = confusion_matrix(y_test, dt_pred)       
+rf_cm = confusion_matrix(y_test, rf_pred)       
+xg_cm = confusion_matrix(y_test, xg_pred)       
+
+# evaluate an LDA model on the dataset using k-fold cross validation
+from sklearn.model_selection import cross_val_score
+accuracies = cross_val_score(estimator = xg_classifier, X = x_train, y = y_train, cv = 10)
+accuracies.mean()
+accuracies.std()
