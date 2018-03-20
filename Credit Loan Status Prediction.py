@@ -8,21 +8,22 @@ train = pd.read_csv('./data/samples/Credit Loan Status/credit_train.csv')
 train = train.head(100000)
 
 #Delete Duplicate rows
-train = train_data.drop_duplicates(subset='Loan ID')
+train = train.drop_duplicates(subset='Loan ID')
 
 #Formating 'years in current job' cells
-train['Years in current job'] = train_data['Years in current job'].replace('8 years', 8)
-train['Years in current job'] = train_data['Years in current job'].replace('<1 year', 0.5)
-train['Years in current job'] = train_data['Years in current job'].replace('1 year', 1)
-train['Years in current job'] = train_data['Years in current job'].replace('2 years', 2)
-train['Years in current job'] = train_data['Years in current job'].replace('3 years', 3)
-train['Years in current job'] = train_data['Years in current job'].replace('4 years', 4)
-train['Years in current job'] = train_data['Years in current job'].replace('5 years', 5)
-train['Years in current job'] = train_data['Years in current job'].replace('6 years', 6)
-train['Years in current job'] = train_data['Years in current job'].replace('7 years', 7)
-train['Years in current job'] = train_data['Years in current job'].replace('9 years', 9)
-train['Years in current job'] = train_data['Years in current job'].replace('10+ years', 11)
-train['Years in current job'] = train_data['Years in current job'].replace('n/a', train['Years in current job'].mode())
+train['Years in current job'] = train['Years in current job'].replace('8 years', 8)
+train['Years in current job'] = train['Years in current job'].replace('<1 year', 0.5)
+train['Years in current job'] = train['Years in current job'].replace('1 year', 1)
+train['Years in current job'] = train['Years in current job'].replace('2 years', 2)
+train['Years in current job'] = train['Years in current job'].replace('3 years', 3)
+train['Years in current job'] = train['Years in current job'].replace('4 years', 4)
+train['Years in current job'] = train['Years in current job'].replace('5 years', 5)
+train['Years in current job'] = train['Years in current job'].replace('6 years', 6)
+train['Years in current job'] = train['Years in current job'].replace('7 years', 7)
+train['Years in current job'] = train['Years in current job'].replace('9 years', 9)
+train['Years in current job'] = train['Years in current job'].replace('10+ years', 11)
+train['Years in current job'] = train['Years in current job'].replace('n/a', train['Years in current job'].mode())
+
 
 #Finding types of Vsriables
 train.dtypes
@@ -39,6 +40,7 @@ cat_columns = train.select_dtypes(['category']).columns
 train[cat_columns] = train[cat_columns].apply(lambda x: x.cat.codes)
 
 #Changing Incorrect Credit Score
+train_data = train
 for i in train_data['Credit Score'].loc[train_data['Credit Score'] > 1000]:
      train_data['Credit Score'].loc[train_data['Credit Score'] > 1000] = i/10
 
@@ -138,3 +140,40 @@ from sklearn.model_selection import cross_val_score
 accuracies = cross_val_score(estimator = xg_classifier, X = x_train, y = y_train, cv = 10)
 accuracies.mean()
 accuracies.std()
+
+################################## Artificial Neural Network #############################################
+#!pip install --upgrade --no-deps git+git://github.com/theano/theano.git
+#!pip install tensorflow-gpu
+#!pip install keras
+
+import tensorflow
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+
+#Initialising ANN
+ann_classifier = Sequential()
+
+#Adding Input layer and hidden layer
+ann_classifier.add(Dense(output_dim=8, init='uniform', activation='relu', input_dim=15))
+
+#Adding the second hidden layer
+ann_classifier.add(Dense(output_dim=8, init='uniform', activation='relu'))
+
+#Adding the output layer
+ann_classifier.add(Dense(output_dim=1, init='uniform', activation='sigmoid'))
+
+#Compiling the ANN
+ann_classifier.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+#Fitting ANN to the train data
+ann_classifier.fit(x_train,y_train,batch_size=15,nb_epoch=100)
+
+#Predicting the results
+ann_pred = ann_classifier.predict(x_test)
+ann_pred = (ann_pred > 0.5)
+
+#Confusion Matrix
+from sklearn.metrics import confusion_matrix
+ann_cm = confusion_matrix(y_test, ann_pred)   #77%
+
