@@ -197,7 +197,7 @@ ann_classifier <- h2o.deeplearning(y = 'LoanStatus',
                                    hidden = c(8,8),
                                    train_samples_per_iteration = -2)
 
-###########################################################################################
+################################### Something Went Wrong here########################################################
 
 
 ###########################################################################################
@@ -219,7 +219,7 @@ n.trees = seq(from=100 ,to=10000, by=100)
 gb_pred <- predict(gb_classifier, newdata = testset[,-16], n.trees = n.trees)
 #kf_pred <- predict(model, newdata = testset[,-16])
 
-pred <- as.data.frame(predict(ann_classifier, newdata = as.h2o(testset[,-16])))
+pred <- as.data.frame(predict(ann_classifier, newdata = as.h2o(testset[,-16]))) #Predicting all the target values as 1
 #h2o_pred <- ifelse(pred[,3] >0.5,0,1)   #If LoanStatus is 0 and 1
 #h2o_pred <- as.integer(h2o_pred)
 
